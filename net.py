@@ -3,17 +3,6 @@ from napalm import get_network_driver
 
 app = Flask(__name__)
 
-menu = ['Get device info',
-        'Get IOS Version',
-        'IOS Upgrade',
-        'Link status for your Device',
-        'Check port-security'
-        'Check Interface Names',
-        'Make "Golden" Configs',
-        'Verify configs against "Golden" configs',
-        'quit'
-        ]
-
 
 @app.route('/')
 def index():
@@ -23,16 +12,21 @@ def index():
 @app.route('/credentials', methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-        print('Your message is a post')
+        ip = request.form['ip']
+        username = request.form['username']
+        password = request.form['password']
+        ios = request.form['ios']
+        return redirect(url_for('interfaces', ip=ip, username=username, password=password, ios=ios))
+
     else:
-        print('Your message is a get')
+        print('YOUR MESSAGE IS A GET !!!')
     return render_template('credentials.html')
 
 
 @app.route('/interfaces')
-def interfaces():
-    driver = get_network_driver('ios')
-    with driver('10.0.0.123', 'jnieves', 'johnny', timeout=10) as device:
+def interfaces(ip, username, password, ios):
+    driver = get_network_driver(ios)
+    with driver(ip, username, password) as device:
         info = device.get_interfaces()
 
     return info
